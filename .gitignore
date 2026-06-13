@@ -2,3 +2,4 @@
 mono.log
 .venv/
 agents/
+**/__pycache__/
