@@ -1,0 +1,4 @@
+# dev stuff 
+mono.log
+.venv/
+agents/
