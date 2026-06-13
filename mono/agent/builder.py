@@ -28,24 +28,28 @@ class AgentBuilder:
 			logger.critical("agent", f"Failed to load agent file {filepath}: {str(e)}")
 			raise
 
-		agent = Agent(self.current_id, self.configloader.get("agent.name", "Unknown"))
+		try:
+			name = self.configloader.get("agent.name")
+			identity = self.configloader.get("agent.identity")
+		except MonoError as e:
+			logger.critical("agent", f"Cannot build agent. {str(e)}")
+			raise
+		
+		agent = Agent(
+			self.current_id,
+			name=name,
+			identity=identity
+			)
+
 		self.agents[self.current_id] = agent
 		self.current_id += 1
 
 		logger.debug("agent", f"Agent({agent.id}) named '{agent.name}' created from {filepath}.")
 
 		context = ContextModule()
-		context.register(agent)
-
-		try:
-			system = self.configloader.get("prompt.system", required_type=str)
-		except MonoError as e:
-			logger.critical("agent", f"Could not find prompt.system while building agent({agent.id}): {str(e)}")
-			raise
-
-		context.set_system_section(agent, system=system)
-
 		model = ModelModule()
+
+		context.register(agent)
 		model.register(agent)
 
 		return agent

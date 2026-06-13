@@ -13,6 +13,11 @@ class Module(ABC):
 			
 		return cls._instances[cls]
 	
+
+	def __init__(self) -> None:
+		super().__init__()
+	
+
 	@abstractmethod
 	def register(self, agent: Agent):
 		pass

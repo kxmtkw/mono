@@ -7,7 +7,7 @@ from mono.agent.builder import AgentBuilder
 
 from mono.utils import logger, MonoError
 
-from mono.interface.base import BaseInterface
+from mono.core.interface import BaseInterface
 
 
 class Orchestrator:
@@ -23,12 +23,14 @@ class Orchestrator:
 		try:
 			agent = self.builder.build(filepath)
 		except MonoError as e:
-			logger.error("orchestrator", f"Failed to run agent because agent could not be built from {filepath}.")
+			logger.error("orchestrator", f"Failed to run agent because agent could not be built from {filepath}. {str(e)}")
 			return
 		
 		self.interface.start()
 
 		logger.info("orchestrator", f"Running agent({agent.id}).")
+
+		agent.activate()
 		self.loop(agent)
 
 
@@ -43,11 +45,16 @@ class Orchestrator:
 
 			prompt = context.make_prompt(agent, role="user", msg=user_input)
 			response = model.ask(agent, request=prompt)
-			
-			context.add_message(agent, role="user", mesg=user_input)
-			context.add_message(agent, role="model", mesg=response)
 
-			self.interface.tell(agent.name, response)
+			context.add_message(agent, role="user", mesg=user_input)
+
+			while response.mode == "think":
+				context.add_message(agent, role="thought", mesg=response.thought)
+				response = model.ask(agent, request=prompt)
+
+			context.add_message(agent, role="model", mesg=response.response)
+
+			self.interface.tell(agent.name, response.response)
 
 
 	

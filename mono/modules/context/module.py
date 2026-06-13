@@ -1,7 +1,9 @@
+from typing import Literal
+
 from mono.core.module import Module
 from mono.agent.agent import Agent
 
-from .storage import AgentContext, guide
+from .storage import AgentContext, guide, system
 
 from mono.utils import logger
 from mono.utils.error import MonoError
@@ -32,7 +34,8 @@ class ContextModule(Module):
 			logger.debug("context", f"Agent({agent.id}) is already registered.")
 			return
 
-		self.contexts[agent.id] = AgentContext("", [])
+		self.contexts[agent.id] = AgentContext(agent.identity, [], "response")
+
 		logger.info("context", f"Registered agent({agent.id}).")
 
 
@@ -44,19 +47,8 @@ class ContextModule(Module):
 			raise ContextError("Agent not registered.", MonoError.ErrorLevel.low)
 		
 		self.contexts.pop(agent.id, None)
-		logger.info("context", f"Unregistered agent({agent.id}).")
-
-
-	def set_system_section(self, agent, *, system: str):
-		"Set the system section of an agent. Raises ContextError if agent not registered."
-
-		if agent.id not in self.contexts:
-			logger.warn("context", f"Tried updating system section, agent({agent.id}) is not registered.")
-			raise ContextError("Agent not registered.")
 		
-		context = self.contexts[agent.id]
-		context.system = system
-		logger.debug("context", f"Updated system section of agent({agent.id}).")
+		logger.info("context", f"Unregistered agent({agent.id}).")
 
 
 	def add_message(self, agent: Agent, *, role: str, mesg: str):
@@ -80,12 +72,11 @@ class ContextModule(Module):
 
 		context = self.contexts[agent.id]
 
-	
-		prompt = f"{guide}\n[SYSTEM]\n{context.system}\n\n"
+		prompt = f"{guide}\n[SYSTEM]\n{system}\n\n"
+		prompt += f"[IDENTITY]\n{context.identity}\n\n"
 		prompt += f"[CHAT]\n{'\n'.join(context.chat)}\n\n"
 		prompt += f"[PROMPT]\n{role.upper()}: {msg}"
 
 		logger.info("context", f"Assembling prompt for agent({agent.id}).")
 
 		return prompt
-		

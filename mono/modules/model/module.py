@@ -3,6 +3,7 @@ from mono.agent.agent import Agent
 
 from google import genai
 
+from mono.modules.model.response import ModelResponse
 from mono.utils import logger
 from mono.utils.error import MonoError
 
@@ -43,22 +44,28 @@ class ModelModule(Module):
 		logger.info("model", f"Unregistered agent({agent.id}).")
 
 
-	def ask(self, agent: Agent, *, request: str) -> str:
+	def ask(self, agent: Agent, *, request: str) -> ModelResponse:
 		"Make a model request. Raises ModelError if agent is not registered (low) or model call fails (high)."
 
 		if agent.id not in self.registered_agents:
 			logger.warn("model", f"Agent({agent.id}) is not registered.")
 			raise ModelError("Agent not registered.")
 
+		
 		try:
 			response = self.client.models.generate_content(
 				model="gemini-3.1-flash-lite",
 				contents=request,
+				config=genai.types.GenerateContentConfig(
+					response_mime_type="application/json", 
+					response_schema=ModelResponse.model_json_schema()
+				)
 			)
+
 			logger.info("model", f"Made model request. Triggered by agent({agent.id}).")
 
 			if response.text:
-				return response.text
+				return ModelResponse.model_validate_json(response.text)
 			else:
 				raise ModelError("Response is empty.")
 			

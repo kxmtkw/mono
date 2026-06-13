@@ -1,4 +1,4 @@
-from .base import BaseInterface
+from mono.core.interface import BaseInterface
 
 
 class TerminalInterface(BaseInterface):
