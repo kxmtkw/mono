@@ -5,7 +5,9 @@ from mono.interface.base import BaseInterface
 
 from .config import AgentConfig
 
+
 class Agent:
+
 
 	def __init__(
 		self,
@@ -45,7 +47,7 @@ class Agent:
 				return
 
 			prompt = self.context.make_prompt("user", user_input)
-			response = self.model.ask(self.id, request=prompt)
+			response = self.model.ask(self.id, prompt)
 
 			self.context.add_message("user", user_input)
 
