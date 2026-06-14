@@ -1,4 +1,5 @@
 
+from mono.agent.config import AgentConfig
 from mono.interface.base import BaseInterface
 
 from .agent import Agent
@@ -36,24 +37,28 @@ class AgentBuilder:
 		try:
 			name = self.configloader.get("agent.name")
 			identity = self.configloader.get("agent.identity")
+			behavior = self.configloader.get("agent.behavior")
+			model = self.configloader.get("agent.model")
 		except MonoError as e:
 			logger.critical("agent", f"Cannot build agent. {str(e)}")
 			raise
 		
 		agent = Agent(
 			self.current_id,
-			self.model,
-			ContextManager(self.current_id, identity),
-			iface,
-			name=name,
-			identity=identity,
-			model=""
-			)
+			config= AgentConfig(
+				name=name, 
+				identity=identity,
+				behaviour=behavior,
+				model=model
+			),
+			model_manager=self.model,
+			interface=iface,
+		)
 
 		self.agents[self.current_id] = agent
 		self.current_id += 1
 
-		logger.debug("agent", f"Agent({agent.id}) named '{agent.name}' created from {filepath}.")
+		logger.debug("agent", f"Agent({agent.id}) named '{agent.config.name}' created from {filepath}.")
 
 		self.model.register(agent.id)
 

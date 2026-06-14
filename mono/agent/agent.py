@@ -3,29 +3,26 @@ from mono.agent.context import ContextManager
 
 from mono.interface.base import BaseInterface
 
+from .config import AgentConfig
+
 class Agent:
 
 	def __init__(
 		self,
 		id: int,
-		modelManager: ModelManager,
-		context: ContextManager,
-		interface: BaseInterface,
 		*,
-		name: str,
-		identity: str,
-		model: str
+		config: AgentConfig,
+		model_manager: ModelManager,
+		interface: BaseInterface,
 		) -> None:
 		
-		self.modelManager: ModelManager = modelManager
-		self.context: ContextManager = context
+		self.id: int = id
+		self.config: AgentConfig = config
+		self.context: ContextManager = ContextManager(self.id, self.config)
+
+		self.model: ModelManager = model_manager
 		self.interface: BaseInterface = interface
 
-		self.id: int = id
-		self.name: str = name
-		self.identity: str = identity
-		self.model: str = model
-		
 		self.active: bool = False
 
 
@@ -44,7 +41,7 @@ class Agent:
 			user_input = self.interface.listen()
 
 			prompt = self.context.make_prompt("user", user_input)
-			response = self.modelManager.ask(self.id, request=prompt)
+			response = self.model.ask(self.id, request=prompt)
 
 			self.context.add_message("user", user_input)
 
@@ -54,7 +51,7 @@ class Agent:
 
 			self.context.add_message("model", response.response)
 
-			self.interface.tell(self.name, response.response)
+			self.interface.tell(self.config.name, response.response)
 
 
 

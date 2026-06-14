@@ -1,12 +1,13 @@
 from typing import Literal
+from mono.agent.config import AgentConfig
 from mono.utils import logger
 
 class ContextManager():
 
 
-	def __init__(self, id: int, identity: str) -> None:
+	def __init__(self, id: int, config: AgentConfig) -> None:
 		self.agent = id
-		self.identity: str = identity
+		self.config: AgentConfig = config
 		self.chat: list[str] = []
 		self.mode: Literal["response", "think"] = "response"
 		
@@ -23,7 +24,7 @@ class ContextManager():
 		"Assemble a prompt. Raises ContextError if agent not registered."
 
 		prompt = f"{guide}\n[SYSTEM]\n{system}\n\n"
-		prompt += f"[IDENTITY]\n{self.identity}\n\n"
+		prompt += f"[IDENTITY]\n{self.config.identity}\n\n"
 		prompt += f"[CHAT]\n{'\n'.join(self.chat)}\n\n"
 		prompt += f"[PROMPT]\n{role.upper()}: {msg}"
 
