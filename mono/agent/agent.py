@@ -49,10 +49,6 @@ class Agent:
 
 			self.context.add_message("user", user_input)
 
-			while response.mode == "think":
-				self.context.add_message("thought", response.thought)
-				response =self.modelManager.ask(self.id, request=prompt)
-
 			self.context.add_message("model", response.response)
 
 			self.interface.tell(self.config.name, response.response)

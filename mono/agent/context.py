@@ -62,6 +62,4 @@ Interaction Style:
 Output Structure:
 
 - response: What is displayed to the user. Only displayed when loop = false.
-- thought: This is for your internal reasoning. Use this only when in a loop and mode is "think"
-- mode: "response" or "think"
 """
