@@ -7,7 +7,7 @@ class MonoError(Exception):
 		medium = 1
 		high = 2
 
-	def __init__(self, msg: str, level: ErrorLevel = ErrorLevel.medium) -> None:
+	def __init__(self, msg: str, level: ErrorLevel = ErrorLevel.low) -> None:
 		super().__init__(f"({level.name.upper()}) {msg}")
 		self.msg = msg
 		self.level = level

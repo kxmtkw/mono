@@ -4,6 +4,7 @@ from dataclasses import dataclass
 class AgentConfig:
 	name: str
 	identity: str
-	behaviour: dict[str, str]
+	personality: str
+	behaviour: str
 	model: str
 	

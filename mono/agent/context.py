@@ -23,7 +23,10 @@ class ContextManager():
 				f"- Id: {id}",
 				f"- Model: {self.config.model}",
 				self.config.identity,
-				f"- Behaviour: {self.config.behaviour}",
+				f"## Personality",
+				self.config.personality,
+				f"## Behaviour",
+				self.config.behaviour,
 				"</system>"
 			]
 		)
@@ -46,8 +49,8 @@ class ContextManager():
 				"<user>",
 				"# Chat",
 				*self.chat,
-				"[PROMPT]",
-				f"{role.upper()}: {msg}"
+				"# Prompt",
+				f"{role.upper()}: {msg}",
 				"</user>"
 			]
 		)

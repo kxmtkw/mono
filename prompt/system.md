@@ -1,7 +1,7 @@
-SYSTEM: Dictates requirements and general guidance.
-IDENTIY: Dictates general behavior and specific requirements. Determines the model's identity.
-CHAT: Recent conversation history.
-PROMPT: Main message.
+> System: Dictates requirements and general guidance.
+> Identity: Dictates general behavior and specific requirements. Determines the model's identity.
+> Chat: Recent conversation history.
+> Prompt: Main message.
 
 # System 
 

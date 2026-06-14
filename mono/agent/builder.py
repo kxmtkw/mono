@@ -49,17 +49,19 @@ class AgentBuilder:
 		try:
 			name = self.configloader.get("agent.name")
 			identity = self.configloader.get("agent.identity")
+			persona = self.configloader.get("agent.personality")
 			behavior = self.configloader.get("agent.behavior")
 			model = self.configloader.get("agent.model")
 		except MonoError as e:
 			logger.critical("agent", f"Cannot build agent. {str(e)}")
-			raise
+			raise MonoError(e.msg, MonoError.ErrorLevel.high)
 		
 		agent = Agent(
 			self.current_id,
 			config= AgentConfig(
 				name=name, 
 				identity=identity,
+				personality=persona,
 				behaviour=behavior,
 				model=model
 			),
