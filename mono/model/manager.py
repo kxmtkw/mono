@@ -16,7 +16,7 @@ class ModelManager():
 	def __init__(self) -> None:
 		super().__init__()
 		self.registered_agents: set[int] = set()
-		self.client = genai.Client(api_key="AQ.Ab8RN6I-HkghglylNFMRWUVVAZ9tB9eWig-TLr976ELEiXqrBA")
+		self.client = genai.Client(api_key="")
 
 
 	def register(self, agent: int):
