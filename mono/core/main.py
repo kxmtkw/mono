@@ -1,8 +1,6 @@
 from mono.core.orchestrator import Orchestrator
-from mono.interface.terminal import TerminalInterface
-
+import sys
 
 def main():
-	iface = TerminalInterface()
-	o = Orchestrator(iface)
-	o.run("agents/mono.toml")
+	o = Orchestrator()
+	o.run(sys.argv[1])
