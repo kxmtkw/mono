@@ -39,6 +39,9 @@ class Orchestrator:
 		except MonoError as e:
 			logger.error("orchestrator", f"Root agent({agent.id}) failed. {str(e)}")
 			self.error(e)
+			return
+		
+		self.interface.end()
 
 
 	def error(self, err: MonoError):

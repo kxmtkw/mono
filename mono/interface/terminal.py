@@ -12,8 +12,16 @@ class TerminalInterface(BaseInterface):
 		print("[ Mono ] > Running terminal interface.")
 	
 
-	def listen(self) -> str:
-		return input("> ").strip()
+	def end(self):
+		print("[ Mono ] > Ending interface.")
+
+
+	def listen(self) -> str | None:
+		try:
+			return input("> ").strip()
+		except KeyboardInterrupt:
+			print()
+			return None
 
 
 	def tell(self, source: str, msg: str) -> None:

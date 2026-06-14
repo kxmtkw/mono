@@ -12,7 +12,12 @@ class BaseInterface(ABC):
 
 
 	@abstractmethod
-	def listen(self) -> str:
+	def end(self):
+		pass
+
+
+	@abstractmethod
+	def listen(self) -> str | None:
 		pass
 
 

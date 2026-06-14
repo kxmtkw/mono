@@ -40,6 +40,10 @@ class Agent:
 
 			user_input = self.interface.listen()
 
+			if user_input is None:
+				self.deactivate()
+				return
+
 			prompt = self.context.make_prompt("user", user_input)
 			response = self.model.ask(self.id, request=prompt)
 
