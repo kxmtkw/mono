@@ -1,66 +1,72 @@
 from google import genai
 
 from mono.model.response import ModelResponse
+from mono.model.base import BaseModelProvider
 from mono.utils import logger
 from mono.utils.error import MonoError
 
 
-class ModelError(MonoError):
-	def __init__(self, msg: str, level: MonoError.ErrorLevel = MonoError.ErrorLevel.medium) -> None:
-		super().__init__(msg, level)
-
+from models import MODELS
 
 class ModelManager():
 
 
 	def __init__(self) -> None:
 		super().__init__()
-		self.registered_agents: set[int] = set()
-		self.client = genai.Client()
+		self.registered_agents: dict[int, str] = {}
+		self.loaded_models: dict[str, BaseModelProvider] = {}
+
+		self.loadModels()
 
 
-	def register(self, agent: int):
-		"Register an agent. If an agent is already present, it would do nothing."
-		self.registered_agents.add(agent)
-		logger.info("model", f"Registered agent({agent}).")
+	def loadModels(self):
+
+		for model_cls in MODELS:
+			model = model_cls()
+			model.start()
+			self.loaded_models[model.name()] = model
+			logger.debug("model", f"Loaded model: {model.name()}")
+		
+
+	def register(self, agent: int, model: str):
+		"Register an agent. If an agent is already present, it would update the model field."
+
+		if model not in self.loaded_models:
+			logger.critical("model", f"Unknown model: {model}")
+			raise MonoError(f"Unknown model: {model}", MonoError.ErrorLevel.high)
+		
+		self.registered_agents[agent] = model
+		logger.info("model", f"Registered agent({agent}) using model: {model}.")
 	
 
 	def unregister(self, agent: int):
-		"Unregister an agent. Raises ModelError if agent is not registered."
+		"Unregister an agent. Raises MonoError if agent is not registered."
 
 		if agent not in self.registered_agents:
 			logger.warn("model", f"Agent({agent}) is not registered.")
 			raise MonoError("Agent not registered.", MonoError.ErrorLevel.low)
 		
-		self.registered_agents.remove(agent)
+		self.registered_agents.pop(agent)
 		logger.info("model", f"Unregistered agent({agent}).")
 
 
 	def ask(self, agent: int, *, request: str) -> ModelResponse:
-		"Make a model request. Raises ModelError if agent is not registered (low) or model call fails (high)."
+		"Make a model request. Raises MonoError if agent is not registered (low) or model call fails (high)."
 
 		if agent not in self.registered_agents:
 			logger.warn("model", f"Agent({agent}) is not registered.")
-			raise ModelError("Agent not registered.")
+			raise MonoError("Agent not registered.")
 
-		
+		model_name = self.registered_agents[agent]
+		model = self.loaded_models[model_name]
+
 		try:
-			response = self.client.models.generate_content(
-				model="gemini-3.1-flash-lite",
-				contents=request,
-				config=genai.types.GenerateContentConfig(
-					response_mime_type="application/json", 
-					response_schema=ModelResponse.model_json_schema()
-				)
-			)
+			response = model.ask(request)
 
 			logger.info("model", f"Made model request. Triggered by agent({agent}).")
 
-			if response.text:
-				return ModelResponse.model_validate_json(response.text)
-			else:
-				raise ModelError("Response is empty.")
-			
+			return response
+		
 		except Exception as e:
 			logger.critical("model", f"API call failed: {str(e)}")
-			raise ModelError(f"Model call failure: {str(e)}", ModelError.ErrorLevel.medium)
+			raise MonoError(f"Model call failure: {str(e)}", MonoError.ErrorLevel.medium)

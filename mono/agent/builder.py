@@ -60,8 +60,12 @@ class AgentBuilder:
 
 		logger.debug("agent", f"Agent({agent.id}) named '{agent.config.name}' created from {filepath}.")
 
-		self.model.register(agent.id)
-
+		try:
+			self.model.register(agent.id, agent.config.model)
+		except MonoError as e:
+			logger.critical("agent", f"Cannot build agent. {str(e)}")
+			raise
+		
 		return agent
 
 
