@@ -13,15 +13,22 @@ from mono.utils import logger, MonoError
 class Orchestrator:
 
 	def __init__(self) -> None:
+		logger.setup()
+
 		self.interface = TerminalInterface()
 		self.interface.start()
 
 		self.model = ModelManager()
-		self.builder = AgentBuilder(self.model)
 
-		logger.setup()
+		try:
+			self.builder = AgentBuilder(self.model)
+		except MonoError as e:
+			logger.error("orchestrator", "Agent builder failed. Aborting.")
+			self.interface.error(str(e))
+			self.interface.end()
+			exit(1)
+		
 
-	
 	def run(self, filepath: str):
 
 		try:

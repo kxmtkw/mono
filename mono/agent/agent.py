@@ -5,6 +5,8 @@ from mono.interface.base import BaseInterface
 
 from .config import AgentConfig
 
+from mono.utils import MonoError
+
 
 class Agent:
 
@@ -14,13 +16,14 @@ class Agent:
 		id: int,
 		*,
 		config: AgentConfig,
+		system_prompt: str,
 		model_manager: ModelManager,
 		interface: BaseInterface,
 		) -> None:
 		
 		self.id: int = id
 		self.config: AgentConfig = config
-		self.context: ContextManager = ContextManager(self.id, self.config)
+		self.context: ContextManager = ContextManager(self.id, system_prompt, self.config)
 
 		self.model: ModelManager = model_manager
 		self.interface: BaseInterface = interface
@@ -47,9 +50,16 @@ class Agent:
 				return
 
 			self.interface.state(f"Responding")
-			
+
 			prompt = self.context.make_prompt("user", user_input)
-			response = self.model.ask(self.id, prompt)
+
+			try:
+				response = self.model.ask(self.id, prompt)
+			except MonoError as e:
+				if e.level == MonoError.ErrorLevel.high:
+					raise
+				self.interface.error(str(e))
+				continue
 
 			self.context.add_message("user", user_input)
 

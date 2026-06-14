@@ -1,3 +1,4 @@
+from pathlib import Path
 
 from mono.agent.config import AgentConfig
 from mono.interface.base import BaseInterface
@@ -16,12 +17,23 @@ class AgentBuilder:
 		self,
 		model: ModelManager
 		) -> None:
+
 		self.model = model
+		self.system_prompt: str = self.load_system_prompt()
 
 		self.configloader = ConfigLoader()
 
 		self.agents: dict[int, Agent] = {}
 		self.current_id = 0
+
+
+	def load_system_prompt(self) -> str:
+		try:
+			with open(Path("prompt/system.md")) as file:
+				return file.read()
+		except FileNotFoundError:
+			logger.warn("agent", f"Could not find system.md")
+			raise MonoError("Could not file system.md", MonoError.ErrorLevel.high)
 
 
 	def build(self, filepath: str, iface: BaseInterface):
@@ -51,6 +63,7 @@ class AgentBuilder:
 				behaviour=behavior,
 				model=model
 			),
+			system_prompt=self.system_prompt,
 			model_manager=self.model,
 			interface=iface,
 		)

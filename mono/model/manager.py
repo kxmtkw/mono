@@ -60,9 +60,7 @@ class ModelManager():
 
 		try:
 			response = model.ask(request)
-
 			logger.info("model", f"Made model request. Triggered by agent({agent}).")
-
 			return response
 		
 		except MonoError as e:
