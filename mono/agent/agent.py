@@ -46,6 +46,8 @@ class Agent:
 				self.deactivate()
 				return
 
+			self.interface.state(f"Responding")
+			
 			prompt = self.context.make_prompt("user", user_input)
 			response = self.model.ask(self.id, prompt)
 

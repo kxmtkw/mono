@@ -13,9 +13,12 @@ from mono.utils import logger, MonoError
 class Orchestrator:
 
 	def __init__(self) -> None:
+		self.interface = TerminalInterface()
+		self.interface.start()
+
 		self.model = ModelManager()
 		self.builder = AgentBuilder(self.model)
-		self.interface = TerminalInterface()
+
 		logger.setup()
 
 	
@@ -25,11 +28,9 @@ class Orchestrator:
 			agent = self.builder.build(filepath, self.interface)
 		except MonoError as e:
 			logger.error("orchestrator", f"Failed to run root agent because agent could not be built from {filepath}. {str(e)}")
-			self.error(e)
+			self.interface.error(f"{e.msg}")
 			return
 		
-		self.interface.start()
-
 		logger.info("orchestrator", f"Running agent({agent.id}).")
 
 		agent.activate()
@@ -38,14 +39,10 @@ class Orchestrator:
 			agent.run()
 		except MonoError as e:
 			logger.error("orchestrator", f"Root agent({agent.id}) failed. {str(e)}")
-			self.error(e)
+			self.interface.error(f"{e.msg}")
 			return
 		
 		self.interface.end()
-
-
-	def error(self, err: MonoError):
-		print(f"[Error] ({err.level.name}) {err.msg}")
 	
 
 
