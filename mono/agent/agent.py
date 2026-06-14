@@ -56,8 +56,6 @@ class Agent:
 			try:
 				response = self.model.ask(self.id, prompt)
 			except MonoError as e:
-				if e.level == MonoError.ErrorLevel.high:
-					raise
 				self.interface.error(str(e))
 				continue
 

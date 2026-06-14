@@ -19,15 +19,8 @@ class Orchestrator:
 		self.interface.start()
 
 		self.model = ModelManager()
-
-		try:
-			self.builder = AgentBuilder(self.model)
-		except MonoError as e:
-			logger.error("orchestrator", "Agent builder failed. Aborting.")
-			self.interface.error(str(e))
-			self.interface.end()
-			exit(1)
-		
+		self.builder = AgentBuilder(self.model)
+	
 
 	def run(self, filepath: str):
 
@@ -49,6 +42,7 @@ class Orchestrator:
 			self.interface.error(f"{e}")
 			return
 		
+		agent.deactivate()
 		self.interface.end()
 	
 

@@ -41,26 +41,24 @@ class ModelManager():
 	def unregister(self, agent: int):
 
 		if agent not in self.registered_agents:
-			logger.warn("model", f"Agent({agent}) is not registered.")
-			raise MonoError("Agent not registered.", MonoError.ErrorLevel.low)
-		
+			logger.warn("model", f"Agent({agent}) is not registered. So can't unregister.")
+			return 
+				
 		self.registered_agents.pop(agent)
 
 		logger.info("model", f"Unregistered agent({agent}).")
 
 
 	def ask(self, agent: int, request: str) -> ModelResponse:
-
-		if agent not in self.registered_agents:
-			logger.warn("model", f"Agent({agent}) is not registered.")
-			raise MonoError("Agent not registered.")
-
+		
+		# we expect agent to be a registered agent
+		# if this call is made then something went wrong
 		model_name = self.registered_agents[agent]
 		model = self.loaded_models[model_name]
 
 		try:
-			response = model.ask(request)
 			logger.info("model", f"Made model request. Triggered by agent({agent}).")
+			response = model.ask(request)
 			return response
 		
 		except MonoError as e:
