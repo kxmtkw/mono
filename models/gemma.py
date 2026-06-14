@@ -8,9 +8,12 @@ from mono.utils.error import MonoError
 
 class Gemma26B(BaseModelProvider):
 
+
 	def __init__(self) -> None:
 		self.model_name: str = "gemma-4-26b-a4b-it"
-		self.client = genai.Client()
+		self.client = genai.Client(
+			http_options=genai.types.HttpOptions(timeout=10)
+		)
 
 	
 	def name(self) -> str:
@@ -43,4 +46,4 @@ class Gemma26B(BaseModelProvider):
 				raise MonoError("Response is empty.")
 			
 		except Exception as e:
-			raise MonoError(f"Model call failure: {str(e)}", MonoError.ErrorLevel.medium)
+			raise MonoError(f"{self.model_name} {str(e)}", MonoError.ErrorLevel.medium)

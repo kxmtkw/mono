@@ -18,11 +18,11 @@ class TerminalInterface(BaseInterface):
 	
 
 	def end(self):
+		self.clear_state()
 		Color.print("[ Mono ] > Ending interface.", Color.magenta)
 
 
 	def listen(self) -> str | None:
-
 		self.clear_state()
 
 		try:
@@ -38,7 +38,7 @@ class TerminalInterface(BaseInterface):
 
 
 	def ask(self, source: str, msg: str, options: tuple[str, ...]) -> str:
-		
+
 		self.clear_state()
 
 		full_prompt = f"[{source}]: {msg} ({'/'.join(options)})"
@@ -52,10 +52,14 @@ class TerminalInterface(BaseInterface):
 
 		
 	def error(self, msg: str):
+		self.clear_state()
+
 		Color.print(f"[Error] {msg}", Color.red)
 
 
 	def state(self, msg: str):
+		self.clear_state()
+
 		Color.print(f"{msg}...", Color.cyan, end="")
 		sys.stdout.flush()
 		self.displaying_state = True

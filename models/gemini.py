@@ -10,7 +10,9 @@ class GeminiFlashLite(BaseModelProvider):
 
 	def __init__(self) -> None:
 		self.model_name: str = "gemini-3.1-flash-lite"
-		self.client = genai.Client()
+		self.client = genai.Client(
+			http_options=genai.types.HttpOptions(timeout=10)
+		)
 
 	
 	def name(self) -> str:
@@ -43,4 +45,4 @@ class GeminiFlashLite(BaseModelProvider):
 				raise MonoError("Response is empty.")
 			
 		except Exception as e:
-			raise MonoError(f"Model call failure: {str(e)}", MonoError.ErrorLevel.medium)
+			raise MonoError(f"{self.model_name} {str(e)}", MonoError.ErrorLevel.medium)

@@ -11,3 +11,6 @@ class MonoError(Exception):
 		super().__init__(f"({level.name.upper()}) {msg}")
 		self.msg = msg
 		self.level = level
+
+	def str(self) -> str:
+		return f"({self.level.name.upper()}) {self.msg}"

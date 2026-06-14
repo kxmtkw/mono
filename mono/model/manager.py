@@ -65,6 +65,6 @@ class ModelManager():
 
 			return response
 		
-		except Exception as e:
-			logger.critical("model", f"API call failed: {str(e)}")
-			raise MonoError(f"Model call failure: {str(e)}", MonoError.ErrorLevel.medium)
+		except MonoError as e:
+			logger.critical("model", f"Model call failed: {e.msg}")
+			raise MonoError(f"Model call failure: {e.msg}", e.level)

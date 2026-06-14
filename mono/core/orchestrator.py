@@ -28,7 +28,7 @@ class Orchestrator:
 			agent = self.builder.build(filepath, self.interface)
 		except MonoError as e:
 			logger.error("orchestrator", f"Failed to run root agent because agent could not be built from {filepath}. {str(e)}")
-			self.interface.error(f"{e.msg}")
+			self.interface.error(f"{e}")
 			return
 		
 		logger.info("orchestrator", f"Running agent({agent.id}).")
@@ -38,8 +38,8 @@ class Orchestrator:
 		try:
 			agent.run()
 		except MonoError as e:
-			logger.error("orchestrator", f"Root agent({agent.id}) failed. {str(e)}")
-			self.interface.error(f"{e.msg}")
+			logger.error("orchestrator", f"Root agent({agent.id}) failed. {e}")
+			self.interface.error(f"{e}")
 			return
 		
 		self.interface.end()
