@@ -1,17 +1,36 @@
-from dataclasses import dataclass
-from enum import Enum
 from typing import Literal
+from mono.utils import logger
+
+class ContextManager():
 
 
+	def __init__(self, id: int, identity: str) -> None:
+		self.agent = id
+		self.identity: str = identity
+		self.chat: list[str] = []
+		self.mode: Literal["response", "think"] = "response"
+		
 
-@dataclass
-class AgentContext:
-	identity: str
-	chat: list[str]
-	mode: Literal["response", "think"]
+	def add_message(self, role: str, mesg: str):
+		"Add a message to the agent's chat. Ignores if agent is not registered."
+
+		self.chat.append(f"{role.upper()}: {mesg}")
+
+		logger.debug("context", f"Updated chat of agent({self.agent}) with role '{role}'.")
 
 
+	def make_prompt(self, role: str, msg: str) -> str:
+		"Assemble a prompt. Raises ContextError if agent not registered."
 
+		prompt = f"{guide}\n[SYSTEM]\n{system}\n\n"
+		prompt += f"[IDENTITY]\n{self.identity}\n\n"
+		prompt += f"[CHAT]\n{'\n'.join(self.chat)}\n\n"
+		prompt += f"[PROMPT]\n{role.upper()}: {msg}"
+
+		logger.info("context", f"Assembling prompt for agent({self.agent}).")
+
+		return prompt
+	
 
 guide = """
 SYSTEM: Dictates requirements and general guidance.

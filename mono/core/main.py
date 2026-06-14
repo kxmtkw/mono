@@ -1,5 +1,5 @@
 from mono.core.orchestrator import Orchestrator
-from mono.interfaces.terminal import TerminalInterface
+from mono.interface.terminal import TerminalInterface
 
 
 def main():

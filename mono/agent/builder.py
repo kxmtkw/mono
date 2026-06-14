@@ -1,24 +1,29 @@
+
+from mono.interface.base import BaseInterface
+
 from .agent import Agent
-import json
+from .context import ContextManager
 
-from mono.modules.context import ContextModule
-from mono.modules.model import ModelModule
-
+from mono.model.manager import ModelManager
 from mono.utils import logger
 from mono.utils import ConfigLoader, MonoError
 
 
 class AgentBuilder:
 
+	def __init__(
+		self,
+		model: ModelManager
+		) -> None:
+		self.model = model
 
-	def __init__(self) -> None:
 		self.configloader = ConfigLoader()
 
 		self.agents: dict[int, Agent] = {}
 		self.current_id = 0
 
 
-	def build(self, filepath: str):
+	def build(self, filepath: str, iface: BaseInterface):
 
 		logger.info("agent", f"Building agent from {filepath}...")
 
@@ -37,8 +42,12 @@ class AgentBuilder:
 		
 		agent = Agent(
 			self.current_id,
+			self.model,
+			ContextManager(self.current_id, identity),
+			iface,
 			name=name,
-			identity=identity
+			identity=identity,
+			model=""
 			)
 
 		self.agents[self.current_id] = agent
@@ -46,11 +55,7 @@ class AgentBuilder:
 
 		logger.debug("agent", f"Agent({agent.id}) named '{agent.name}' created from {filepath}.")
 
-		context = ContextModule()
-		model = ModelModule()
-
-		context.register(agent)
-		model.register(agent)
+		self.model.register(agent.id)
 
 		return agent
 
