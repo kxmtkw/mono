@@ -5,5 +5,5 @@ class ToolCall:
 
 @dataclass(frozen=True)
 class ToolResult:
-	succes: bool
+	success: bool
 	output: str
