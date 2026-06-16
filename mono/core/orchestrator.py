@@ -6,6 +6,7 @@ from mono.model.manager import ModelManager
 from mono.interface.base import BaseInterface
 from mono.interface.terminal import TerminalInterface
 
+from mono.tools.manager import ToolManager
 from mono.utils import logger, MonoError
 
 
@@ -19,7 +20,9 @@ class Orchestrator:
 		self.interface.start()
 
 		self.model = ModelManager()
-		self.builder = AgentBuilder(self.model)
+		self.tools = ToolManager()
+
+		self.builder = AgentBuilder(self.model, self.tools)
 	
 
 	def run(self, filepath: str):

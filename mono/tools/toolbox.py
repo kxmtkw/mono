@@ -3,8 +3,6 @@ from mono.utils import logger
 from dataclasses import dataclass
 from typing import Callable
 
-from .executor import ToolResult
-
 
 @dataclass(kw_only=True, frozen=True)
 class ToolSpec:
@@ -18,6 +16,12 @@ class ToolSpec:
 class ToolSpace:
 	namespace: str
 	tools: dict[str, ToolSpec]
+
+
+@dataclass(frozen=True)
+class ToolResult:
+	success: bool
+	output: str
 
 
 class ToolBox:

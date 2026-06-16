@@ -4,9 +4,10 @@ from mono.agent.config import AgentConfig
 from mono.interface.base import BaseInterface
 
 from .agent import Agent
-from .context import ContextManager
 
 from mono.model.manager import ModelManager
+from mono.tools.manager import ToolManager
+
 from mono.utils import logger
 from mono.utils import ConfigLoader, MonoError
 
@@ -15,10 +16,12 @@ class AgentBuilder:
 
 	def __init__(
 		self,
-		model: ModelManager
+		model: ModelManager,
+		tools: ToolManager
 		) -> None:
 
 		self.model = model
+		self.tools = tools
 
 		self.configloader = ConfigLoader()
 
@@ -50,6 +53,7 @@ class AgentBuilder:
 			persona = self.configloader.get("agent.personality")
 			behavior = self.configloader.get("agent.behavior")
 			model = self.configloader.get("agent.model")
+			capabilties = self.configloader.get("agent.capabilities")
 		except MonoError as e:
 			logger.critical("agent", f"Cannot build agent. {str(e)}")
 			raise MonoError(e.msg, MonoError.ErrorLevel.high)
@@ -61,10 +65,12 @@ class AgentBuilder:
 				identity=identity,
 				personality=persona,
 				behaviour=behavior,
-				model=model
+				model=model,
+				capabilities=capabilties
 			),
 			system_prompt=self.system_prompt,
 			model_manager=self.model,
+			tool_manager=self.tools,
 			interface=iface,
 		)
 
@@ -75,6 +81,7 @@ class AgentBuilder:
 
 		try:
 			self.model.register(agent.id, agent.config.model)
+			self.tools.register(agent.id, agent.config.capabilities)
 		except MonoError as e:
 			logger.critical("agent", f"Cannot build agent. {str(e)}")
 			raise

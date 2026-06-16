@@ -1,7 +1,6 @@
 
 from mono.utils import MonoError, logger
-from .toolbox import ToolBox, ToolSpace
-from .executor import ToolResult
+from .toolbox import ToolBox, ToolSpace, ToolResult
 
 
 class ToolManager:

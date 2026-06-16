@@ -7,4 +7,4 @@ class AgentConfig:
 	personality: str
 	behaviour: str
 	model: str
-	
+	capabilities: list[str]
