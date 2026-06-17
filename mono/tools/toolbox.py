@@ -87,7 +87,7 @@ class ToolRegistry:
 		self,
 		name: str,
 		info: str,
-		arguments: dict[str, tuple[type[str], str]]
+		arguments: dict[str, tuple[type, str]]
 	):
 		
 		def decorator(func: Callable[..., ToolResult]):

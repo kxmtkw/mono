@@ -97,7 +97,7 @@ class Agent:
 					self.interface.error(str(e))
 					continue
 
-				self.context.make_prompt("tools", f"Success: {result.success}\n{result.output}")
+				self.context.add_message("tools", f"Success: {result.success}\n{result.output}")
 
 
 			self.context.add_message("model", response.response)

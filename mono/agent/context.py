@@ -26,7 +26,7 @@ class ContextManager():
 				self.system,
 				"# Identity",
 				f"- Name: {self.config.name}",
-				f"- Id: {id}",
+				f"- Id: {self.agent}",
 				f"- Model: {self.config.model}",
 				self.config.identity,
 				f"## Personality",
