@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from mono.agent.config import AgentConfig
 from mono.interface.base import BaseInterface
 
-from .agent import Agent
+from mono.agent.agent import Agent
+from mono.agent.config import AgentConfig
 
 from mono.model.manager import ModelManager
 from mono.tools.manager import ToolManager
@@ -48,40 +48,29 @@ class AgentBuilder:
 			raise
 
 		try:
-			name = self.configloader.get("agent.name")
-			identity = self.configloader.get("agent.identity")
-			persona = self.configloader.get("agent.personality")
-			behavior = self.configloader.get("agent.behavior")
-			model = self.configloader.get("agent.model")
-			capabilties = self.configloader.get("agent.capabilities")
-		except MonoError as e:
+			data = self.configloader.getdata()
+			config = AgentConfig.model_validate(data)
+		except Exception as e:
 			logger.critical("agent", f"Cannot build agent. {str(e)}")
-			raise MonoError(e.msg, MonoError.ErrorLevel.high)
+			raise MonoError(str(e), MonoError.ErrorLevel.high)
 		
 		agent = Agent(
-			self.current_id,
-			config= AgentConfig(
-				name=name, 
-				identity=identity,
-				personality=persona,
-				behaviour=behavior,
-				model=model,
-				capabilities=capabilties
-			),
-			system_prompt=self.system_prompt,
-			model_manager=self.model,
-			tool_manager=self.tools,
+			id=self.current_id,
+			config=config,
+			system=self.system_prompt,
+			modelmanager=self.model,
+			toolmanager=self.tools,
 			interface=iface,
 		)
 
 		self.agents[self.current_id] = agent
 		self.current_id += 1
 
-		logger.debug("agent", f"Agent({agent.id}) named '{agent.config.name}' created from {filepath}.")
+		logger.debug("agent", f"Agent({agent.id}) named '{agent.config.identity.name}' created from {filepath}.")
 
 		try:
-			self.model.register(agent.id, agent.config.model)
-			self.tools.register(agent.id, agent.config.capabilities)
+			self.model.register(agent.id, agent.config.model.name)
+			self.tools.register(agent.id, agent.config.capabilities.allowed_tools)
 		except MonoError as e:
 			logger.critical("agent", f"Cannot build agent. {str(e)}")
 			raise

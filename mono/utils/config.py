@@ -9,25 +9,19 @@ class ConfigLoader:
 		self._config: dict[str, Any] = {}
 
 
-	def _flatten_dict(self, d: dict, parent_key: str = '', sep: str = '.') -> dict:
-		items = []
-		for k, v in d.items():
-			new_key = f"{parent_key}{sep}{k}" if parent_key else k
-			if isinstance(v, dict):
-				items.extend(self._flatten_dict(v, new_key, sep=sep).items())
-			else:
-				items.append((new_key, v))
-		return dict(items)
-
 
 	def load(self, filepath: str) -> None:
 		try:
 			with open(filepath, "rb") as f:
 				data = tomllib.load(f)
-				self._config = self._flatten_dict(data)
+				self._config = data
 		except Exception as e:
 			raise MonoError(f"Failed to load config file {filepath}: {e}")
+	
 
+	def getdata(self) -> dict[str, Any]:
+		return self._config
+	
 
 	def get(
 		self,

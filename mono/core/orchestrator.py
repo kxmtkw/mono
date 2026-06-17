@@ -1,5 +1,5 @@
 from mono.agent.agent import Agent
-from mono.agent.builder import AgentBuilder
+from mono.builder.builder import AgentBuilder
 
 from mono.model.manager import ModelManager
 

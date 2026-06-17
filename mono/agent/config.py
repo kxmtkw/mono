@@ -1,10 +1,27 @@
 from dataclasses import dataclass
+from pydantic import BaseModel
 
-@dataclass(kw_only=True, frozen=True)
-class AgentConfig:
+
+class AgentIdentity(BaseModel):
 	name: str
-	identity: str
+	intro: str
 	personality: str
-	behaviour: str
-	model: str
-	capabilities: list[str]
+	behavior: str
+	constraints: str
+
+
+class AgentCapabilities(BaseModel):
+	allowed_tools: list[str]
+
+
+class AgentModel(BaseModel):
+	mutable: bool
+	provider: str
+	name: str
+
+
+class AgentConfig(BaseModel):
+	identity: AgentIdentity
+	capabilities: AgentCapabilities
+	model: AgentModel
+	

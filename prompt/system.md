@@ -22,4 +22,6 @@
 	
 ## Output Structure:
 
-- response: What is displayed to the user. Only displayed when loop = false.
+- response: What is displayed to the user. Only displayed when toolcalled = false.
+- toolcalled: Whether to enter tool mode and execute a tool.
+- toolcall: The tool that the model needs to call.
