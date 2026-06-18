@@ -124,7 +124,6 @@ class Agent:
 		msg = ""
 
 		for tool in response.toolcall:
-			self.interface.state(f"executing: {tool.namespace}::{tool.toolname}")
 
 			result = self.tools.execute(
 				self.id,
@@ -132,7 +131,7 @@ class Agent:
 				tool.toolname,
 				ModelResponse.convert_to_dict(tool.args),
 			)
-
+			self.interface.tell("tools", f"Executed: {tool.namespace}::{tool.toolname}")
 			msg += f"Tool {tool.namespace}::{tool.toolname} executed. Successful = {result.success}.\n<output>\n{result.output}\n</output>"
 
 		self.prompt.update(chat=self.memory.get_chat())
