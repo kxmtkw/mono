@@ -12,6 +12,7 @@ class ToolManager:
 
 		self.registered_agents: dict[int, set[str]] = {}
 		self.toolbox = ToolBox()
+		self.tool_id = 0
 
 
 	def register(self, agent_id: int, capabilities: list[str]):
@@ -53,7 +54,7 @@ class ToolManager:
 
 	def execute(self, agent_id: int, space: str, name: str, args: dict[str, str]) -> ToolResult:
 
-		logger.info(f"Agent({agent_id}) executed tool: {space}::{name}")
+		logger.info(f"Agent({agent_id}) executed tool({self.tool_id}): {space}::{name} with arguments {args}")
 
 		tool = self.toolbox.get_tool(space, name)
 
@@ -66,14 +67,16 @@ class ToolManager:
 		try:
 			result = tool.func(**args)
 		except Exception as e:
-			msg =  f"Tool {space}::{name} failed. {e.__class__.__name__}: {e}. Should not have happened."
+			msg =  f"Tool({self.tool_id}) {space}::{name} failed. {e.__class__.__name__}: {e}. Should not have happened."
 			logger.critical(msg)
 			return ToolResult(
 				False,
 			 	msg
 			)
 		
-		logger.debug(f"Tool {space}::{name} result: Success({result.success})")
+		logger.debug(f"Tool({self.tool_id}) {space}::{name} result: Success({result.success})")
+
+		self.tool_id += 1
 		return result
 
 		
