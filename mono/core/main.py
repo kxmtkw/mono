@@ -1,7 +1,12 @@
+from dotenv import load_dotenv
+load_dotenv()
+
+import tools
+
 from mono.core.orchestrator import Orchestrator
 from mono.utils import MonoError
 import sys
-import tools
+
 
 def main():
 	try:

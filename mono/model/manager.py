@@ -11,8 +11,8 @@ class ModelManager():
 
 	def __init__(self) -> None:
 		super().__init__()
-		self.registered_agents: dict[int, str] = {}
-		self.loaded_models: dict[str, BaseModelProvider] = {}
+		self.registered_agents: dict[int, BaseModelProvider] = {}
+		self.available_models: dict[str, type[BaseModelProvider]] = {}
 
 		self.loadModels()
 
@@ -20,21 +20,23 @@ class ModelManager():
 	def loadModels(self):
 
 		for model_cls in MODELS:
-			model = model_cls()
-			model.start()
-			self.loaded_models[model.name()] = model
-			logger.debug("model", f"Loaded model: {model.name()}")
+			self.available_models[model_cls.name()] = model_cls
+			logger.debug("model", f"Found model: {model_cls.name()}")
 		
 
 	def register(self, agent: int, model: str):
 
-		if model not in self.loaded_models:
+		if model not in self.available_models:
 			logger.critical("model", f"Unknown model: {model}")
 
 			raise MonoError(f"Unknown model: {model}", MonoError.ErrorLevel.high)
 		
-		self.registered_agents[agent] = model
-
+		try:
+			self.registered_agents[agent] = self.available_models[model]()
+		except MonoError as e:
+			logger.critical("models", f"Error during init of {model}: {e}")
+			raise e
+		
 		logger.info("model", f"Registered agent({agent}) using model: {model}.")
 	
 
@@ -53,8 +55,7 @@ class ModelManager():
 		
 		# we expect agent to be a registered agent
 		# if this call is made then something went wrong
-		model_name = self.registered_agents[agent]
-		model = self.loaded_models[model_name]
+		model = self.registered_agents[agent]
 
 		try:
 			logger.info("model", f"Made model request. Triggered by agent({agent}).")

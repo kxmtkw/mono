@@ -6,16 +6,9 @@ class BaseModelProvider:
 	def __init__(self) -> None:
 		pass
 
+	@classmethod
 	@abstractmethod
-	def name(self) -> str:
-		pass
-
-	@abstractmethod
-	def start(self):
-		pass
-
-	@abstractmethod
-	def end(self):
+	def name(cls) -> str:
 		pass
 
 	@abstractmethod

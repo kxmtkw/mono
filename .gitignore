@@ -1,5 +1,8 @@
 # dev stuff 
-mono.log
 .venv/
-agents/
 **/__pycache__/
+logs/
+
+# configuration
+agents/
+.env

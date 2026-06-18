@@ -4,27 +4,28 @@ from mono.model.response import ModelResponse
 from google import genai
 
 from mono.utils.error import MonoError
+import os
 
 
 class GeminiFlashLite(BaseModelProvider):
 
+	model_name: str = "gemini-3.1-flash-lite"
+
 	def __init__(self) -> None:
-		self.model_name: str = "gemini-3.1-flash-lite"
+
+		self.api_key: str | None = os.getenv("GEMINI_API_KEY")
+
+		if not self.api_key:
+			raise MonoError(f"API key not found for {self.model_name}. Set the env var: GEMINI_API_KEY")
+		
 		self.client = genai.Client(
+			api_key=self.api_key,
 			http_options=genai.types.HttpOptions(timeout=10000)
 		)
 
-	
-	def name(self) -> str:
-		return self.model_name
-
-
-	def start(self):
-		pass
-
-
-	def end(self):
-		pass
+	@classmethod
+	def name(cls) -> str:
+		return cls.model_name
 
 
 	def ask(self, msg: str) -> ModelResponse:

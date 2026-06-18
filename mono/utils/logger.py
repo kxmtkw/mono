@@ -1,4 +1,6 @@
 from enum import Enum
+import os
+from pathlib import Path
 
 class Level(Enum):
 	debug = 0
@@ -9,11 +11,13 @@ class Level(Enum):
 
 
 _enabled = True
-_file = "mono.log"
+_file = os.getenv("LOG_FILE")
+_file = Path(_file) if _file else Path("logs") / "mono.log"
+
 _level = Level.debug
 
 
-def setup(enabled: bool = _enabled, filepath: str = _file, level = _level):
+def setup(enabled: bool = _enabled, filepath: Path = _file, level = _level):
 
 	global _enabled, _file, _level
 
