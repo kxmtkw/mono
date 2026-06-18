@@ -1,8 +1,9 @@
-from mono.utils import logger
+from mono.utils import Logger
 
 from dataclasses import dataclass
 from typing import Callable
 
+logger = Logger("toolbox")
 
 @dataclass(kw_only=True, frozen=True)
 class ToolSpec:
@@ -56,14 +57,14 @@ class ToolBox:
 	@classmethod
 	def _register(cls, toolspace: ToolSpace):
 		if toolspace.namespace in ToolBox._toolspaces:
-			logger.warn("tools", f"Toolspace with name '{toolspace.namespace}' was already registered. Ignoring this new one.")
+			logger.warn(f"Toolspace with name '{toolspace.namespace}' was already registered. Ignoring this new one.")
 			return
 		
 		ToolBox._toolspaces[toolspace.namespace] = toolspace
-		logger.info("tools", f"Toolspace '{toolspace.namespace}' registered.")
+		logger.info(f"Toolspace '{toolspace.namespace}' registered.")
 
 		for tool in toolspace.tools.values():
-			logger.debug("tools", f"Added tool: {toolspace.namespace}::{tool.name}")
+			logger.debug(f"Added tool: {toolspace.namespace}::{tool.name}")
 
 
 class ToolRegistry:

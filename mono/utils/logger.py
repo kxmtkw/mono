@@ -1,5 +1,6 @@
 from enum import Enum
 import os
+from datetime import datetime
 from pathlib import Path
 
 class Level(Enum):
@@ -10,51 +11,57 @@ class Level(Enum):
 	error = 4
 
 
-_enabled = True
-_file = os.getenv("LOG_FILE")
-_file = Path(_file) if _file else Path("logs") / "mono.log"
+class Logger:
 
-_level = Level.debug
+	_enabled = True
+	_file = os.getenv("self.LOG_FILE")
+	_file = Path(_file) if _file else Path("logs") / "mono.log"
 
+	if not _file.exists(): _file.touch()
 
-def setup(enabled: bool = _enabled, filepath: Path = _file, level = _level):
-
-	global _enabled, _file, _level
-
-	_enabled = enabled
-	_file = filepath
-	_level = level
-
-	with open(_file, "w") as file:
-		pass
+	_level = Level.debug
 
 
-def log(domain: str, msg: str, level: Level):
+	def __init__(self, domain: str) -> None:
+		self._domain = domain
 
-	if not _enabled: return
-	if level.value < _level.value: return
+
+	def log(self, domain: str, msg: str, level: Level):
+
+		if not self._enabled: return
+		if level.value < self._level.value: return
+			
+		timestamp = datetime.now().isoformat(sep=' ', timespec='seconds')
+		self.logged = f"[{timestamp}] [{level.name}] ({domain}) {msg}\n"
+
+		with open(self._file, "a") as file:
+			file.write(self.logged)
+
+
+	def debug(self, msg: str):
+		self.log(self._domain, msg, Level.debug)
+
+
+	def info(self, msg: str):
+		self.log(self._domain, msg, Level.info)
+
+
+	def warn(self, msg: str):
+		self.log(self._domain, msg, Level.warn)
+
+
+	def critical(self, msg: str):
+		self.log(self._domain, msg, Level.critical)
 		
-	logged = f"[{level.name}] ({domain}) {msg}\n"
-
-	with open(_file, "a") as file:
-		file.write(logged)
-
-
-def debug(domain: str, msg: str):
-	log(domain, msg, Level.debug)
+		
+	def error(self, msg: str):
+		self.log(self._domain, msg, Level.error)
 
 
-def info(domain: str, msg: str):
-	log(domain, msg, Level.info)
 
 
-def warn(domain: str, msg: str):
-	log(domain, msg, Level.warn)
 
 
-def critical(domain: str, msg: str):
-	log(domain, msg, Level.critical)
-	
-	
-def error(domain: str, msg: str):
-	log(domain, msg, Level.error)
+
+
+

@@ -1,11 +1,15 @@
 
-from mono.utils import MonoError, logger
+from mono.utils import MonoError, Logger
 from .toolbox import ToolBox, ToolSpace, ToolResult
+
+logger = Logger("tools")
 
 
 class ToolManager:
 
 	def __init__(self) -> None:
+		import tools
+
 		self.registered_agents: dict[int, set[str]] = {}
 		self.toolbox = ToolBox()
 
@@ -18,24 +22,24 @@ class ToolManager:
 
 		self.registered_agents[agent_id] = set(capabilities)
 
-		logger.info("tools", f"Registered agent({agent_id}) with capabilities: {capabilities}")
+		logger.info(f"Registered agent({agent_id}) with capabilities: {capabilities}")
 
 	
 	def unregister(self, agent_id: int):
 
 		if agent_id not in self.registered_agents:
-			logger.warn("tools", f"Agent({agent_id}) is not registered. So can't unregister.")
+			logger.warn(f"Agent({agent_id}) is not registered. So can't unregister.")
 			return 
 				
 		self.registered_agents.pop(agent_id)
 
-		logger.info("tools", f"Unregistered agent({agent_id}).")
+		logger.info(f"Unregistered agent({agent_id}).")
 
 
 	def get_agent_toolbox(self, agent_id: int) -> list[ToolSpace]:
 
 		if agent_id not in self.registered_agents:
-			logger.warn("tools", f"Agent({agent_id}) is not registered. Can't give toolbox to caller.")
+			logger.warn(f"Agent({agent_id}) is not registered. Can't give toolbox to caller.")
 			return []
 		
 		spaces = []
@@ -49,7 +53,7 @@ class ToolManager:
 
 	def execute(self, agent_id: int, space: str, name: str, args: dict[str, str]) -> ToolResult:
 
-		logger.info("tools", f"Agent({agent_id}) executed tool: {space}::{name}")
+		logger.info(f"Agent({agent_id}) executed tool: {space}::{name}")
 
 		tool = self.toolbox.get_tool(space, name)
 
@@ -63,14 +67,13 @@ class ToolManager:
 			result = tool.func(**args)
 		except Exception as e:
 			msg =  f"Tool {space}::{name} failed. {e.__class__.__name__}: {e}. Should not have happened."
-			logger.critical("tools", msg)
+			logger.critical(msg)
 			return ToolResult(
 				False,
 			 	msg
 			)
 		
-		logger.debug("tools", f"Tool {space}::{name} result: Success({result.success})")
-
+		logger.debug(f"Tool {space}::{name} result: Success({result.success})")
 		return result
 
 		

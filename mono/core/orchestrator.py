@@ -7,14 +7,15 @@ from mono.interface.base import BaseInterface
 from mono.interface.terminal import TerminalInterface
 
 from mono.tools.manager import ToolManager
-from mono.utils import logger, MonoError
+from mono.utils import Logger, MonoError
 
+logger = Logger("orchestrator")
 
 
 class Orchestrator:
 
 	def __init__(self) -> None:
-		logger.setup()
+		logger.info("Hello World!")
 
 		self.interface = TerminalInterface()
 		self.interface.start()
@@ -30,23 +31,25 @@ class Orchestrator:
 		try:
 			agent = self.builder.build(filepath, self.interface)
 		except MonoError as e:
-			logger.error("orchestrator", f"Failed to run root agent because agent could not be built from {filepath}. {str(e)}")
+			logger.error(f"Failed to run root agent because agent could not be built from {filepath}. {str(e)}")
 			self.interface.error(f"{e}")
 			return
 		
-		logger.info("orchestrator", f"Running agent({agent.id}).")
+		logger.info(f"Running agent({agent.id}).")
 
 		agent.activate()
 
 		try:
 			agent.run()
 		except MonoError as e:
-			logger.error("orchestrator", f"Root agent({agent.id}) failed. {e}")
+			logger.error(f"Root agent({agent.id}) failed. {e}")
 			self.interface.error(f"{e}")
 			return
 		
 		agent.deactivate()
 		self.interface.end()
+
+		logger.info("Bye World!")
 	
 
 

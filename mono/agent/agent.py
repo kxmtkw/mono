@@ -28,6 +28,7 @@ class Agent:
 		interface: BaseInterface,
 		) -> None:
 		
+		
 		self.id: int = id
 		self.config: AgentConfig = config
 
@@ -40,11 +41,14 @@ class Agent:
 
 		self.active: bool = False
 		
+		self.model.register(self.id, self.config.model.name)
+		self.tools.register(self.id, self.config.capabilities.allowed_tools)
+
 		self.variables: dict[str, Any] = {} # temporary
 
 
 	def activate(self):
-		self.active = True
+		self.active = True 
 		self.prompt.update(
 			chat=self.memory.get_chat(),
 			toolspaces=self.tools.get_agent_toolbox(self.id)

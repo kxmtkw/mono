@@ -71,9 +71,6 @@ class PromptManager():
 			]
 		)
 
-
-		logger.debug("context", f"Updated chat of agent({self.agent_id}) with role '{role}'.")
-
 		return prompt
 
 

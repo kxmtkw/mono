@@ -1,10 +1,11 @@
 from mono.model.response import ModelResponse
 from mono.model.base import BaseModelProvider
-from mono.utils import logger
+from mono.utils.logger import Logger
 from mono.utils.error import MonoError
 
 from models import MODELS
 
+logger = Logger("model")
 
 class ModelManager():
 
@@ -21,34 +22,35 @@ class ModelManager():
 
 		for model_cls in MODELS:
 			self.available_models[model_cls.name()] = model_cls
-			logger.debug("model", f"Found model: {model_cls.name()}")
+			logger.debug(f"Found model: {model_cls.name()}")
 		
 
 	def register(self, agent: int, model: str):
 
+
 		if model not in self.available_models:
-			logger.critical("model", f"Unknown model: {model}")
+			logger.critical(f"Unknown model loaded by agent({agent}): {model}")
 
 			raise MonoError(f"Unknown model: {model}", MonoError.ErrorLevel.high)
 		
 		try:
 			self.registered_agents[agent] = self.available_models[model]()
 		except MonoError as e:
-			logger.critical("models", f"Error during init of {model}: {e}")
+			logger.critical(f"Error during init of {model} by agent({agent}): {e}")
 			raise e
 		
-		logger.info("model", f"Registered agent({agent}) using model: {model}.")
+		logger.info(f"Registered agent({agent}) using model: {model}.")
 	
 
 	def unregister(self, agent: int):
 
 		if agent not in self.registered_agents:
-			logger.warn("model", f"Agent({agent}) is not registered. So can't unregister.")
+			logger.warn(f"Agent({agent}) is not registered. So can't unregister.")
 			return 
 				
 		self.registered_agents.pop(agent)
 
-		logger.info("model", f"Unregistered agent({agent}).")
+		logger.info(f"Unregistered agent({agent}).")
 
 
 	def ask(self, agent: int, request: str) -> ModelResponse:
@@ -58,10 +60,10 @@ class ModelManager():
 		model = self.registered_agents[agent]
 
 		try:
-			logger.info("model", f"Made model request. Triggered by agent({agent}).")
+			logger.info(f"Made model request. Triggered by agent({agent}).")
 			response = model.ask(request)
 			return response
 		
 		except MonoError as e:
-			logger.critical("model", f"Model call failed: {e.msg}")
-			raise MonoError(f"Model call failure: {e.msg}", e.level)
+			logger.critical(f"Model({model.name()}) call by agent({agent}) failed: {e.msg}")
+			raise MonoError(f"Model({model.name()}) call by agent({agent}) failed: {e.msg}", e.level)
