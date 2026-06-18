@@ -16,7 +16,7 @@ class ToolCall(BaseModel):
 class ModelResponse(BaseModel):
 	response: str
 	toolcalled: bool
-	toolcall: ToolCall | None
+	toolcall: ToolCall | list[ToolCall] | None
 	
 	@classmethod
 	def convert_to_dict(cls, tool_args: list[Any]) -> dict[str, Any]:

@@ -6,7 +6,7 @@ from mono.agent.prompt import PromptManager
 from mono.model.manager import ModelManager
 
 from mono.interface.base import BaseInterface
-from mono.model.response import ModelResponse
+from mono.model.response import ModelResponse, ToolCall
 from mono.tools.manager import ToolManager
 
 from .config import AgentConfig
@@ -114,21 +114,26 @@ class Agent:
 
 	def execute_tool(self):
 		
-
 		response: ModelResponse = self.variables["model_response"]
 
 		if not response.toolcall: return self.wait_for_input
 
-		self.interface.state(f"executing: {response.toolcall.namespace}::{response.toolcall.toolname}")
+		if isinstance(response.toolcall, ToolCall):
+			response.toolcall = [response.toolcall]
 
-		result = self.tools.execute(
-			self.id,
-			response.toolcall.namespace,
-			response.toolcall.toolname,
-			ModelResponse.convert_to_dict(response.toolcall.args),
-		)
+		msg = ""
 
-		msg = f"Tool {response.toolcall.namespace}::{response.toolcall.toolname} executed. Successful = {result.success}.\n<output>\n{result.output}\n</output>"
+		for tool in response.toolcall:
+			self.interface.state(f"executing: {tool.namespace}::{tool.toolname}")
+
+			result = self.tools.execute(
+				self.id,
+				tool.namespace,
+				tool.toolname,
+				ModelResponse.convert_to_dict(tool.args),
+			)
+
+			msg += f"Tool {tool.namespace}::{tool.toolname} executed. Successful = {result.success}.\n<output>\n{result.output}\n</output>"
 
 		self.prompt.update(chat=self.memory.get_chat())
 
