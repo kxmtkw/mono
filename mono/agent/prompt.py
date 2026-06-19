@@ -66,10 +66,13 @@ class PromptManager():
 				"</chat>",
 				"<prompt>",
 				f"{role.upper()}: {mesg}",
-				"</prompt>"
+				"</prompt>",
 				"</user>",
 			]
 		)
+
+		with open("logs/prompt.txt", "w") as file:
+			file.write(prompt + "\n"*10)
 
 		return prompt
 

@@ -14,6 +14,15 @@ from .config import AgentConfig
 from mono.utils import MonoError
 
 
+class LoopState:
+	
+	def __init__(self) -> None:
+		self.user_input: str
+		self.prompt: str
+		self.model_response: ModelResponse
+		self.tool_calls: ToolCall | list[ToolCall]
+
+
 class Agent:
 
 
@@ -44,7 +53,8 @@ class Agent:
 		self.model.register(self.id, self.config.model.name)
 		self.tools.register(self.id, self.config.capabilities.allowed_tools)
 
-		self.variables: dict[str, Any] = {} # temporary
+		self.loopstate = LoopState()
+
 
 
 	def activate(self):
@@ -63,39 +73,38 @@ class Agent:
 	def run(self):
 
 		while self.active:
-			with open("mono.prompt", "a") as file:
-				file.write(" " if not self.variables.get("prompt", None) else self.variables["prompt"])
-				file.write(" "*20)
-
 			self.current_stage = self.current_stage()
 
 			
 	def wait_for_input(self):
+		
 		user_input = self.interface.listen()
 
 		if user_input is None:
 			self.deactivate()
 			return self.wait_for_input
 		
+		self.loopstate.user_input = user_input
 
 		self.prompt.update(chat=self.memory.get_chat())
+		self.loopstate.prompt = self.prompt.make_prompt("user", user_input)
+
 		self.memory.add_message("user", user_input)
 
-		self.variables["prompt"] = self.prompt.make_prompt("user", user_input)
 		return self.ask_model
 	
-
 
 	def ask_model(self):
 
 		self.interface.state(f"responding")
 		
 		try:
-			self.variables["model_response"] = self.model.ask(self.id, self.variables["prompt"] )
+			model_res = self.model.ask(self.id, self.loopstate.prompt)
 		except MonoError as e:
 			self.interface.error(str(e))
 			return self.wait_for_input
 
+		self.loopstate.model_response = model_res
 
 		return self.parse_response
 
@@ -104,9 +113,10 @@ class Agent:
 
 		self.interface.state(f"parsing")
 
-		response: ModelResponse = self.variables["model_response"]
+		response: ModelResponse = self.loopstate.model_response
 
-		if response.toolcalled:
+		if response.toolcall is not None:
+			self.loopstate.tool_calls = response.toolcall
 			return self.execute_tool
 		
 		self.memory.add_message("model", response.response)
@@ -118,16 +128,15 @@ class Agent:
 
 	def execute_tool(self):
 		
-		response: ModelResponse = self.variables["model_response"]
+		toolcalls = self.loopstate.tool_calls
 
-		if not response.toolcall: return self.wait_for_input
 
-		if isinstance(response.toolcall, ToolCall):
-			response.toolcall = [response.toolcall]
+		if isinstance(toolcalls, ToolCall):
+			toolcalls = [toolcalls]
 
 		msg = ""
 
-		for tool in response.toolcall:
+		for tool in toolcalls:
 
 			result = self.tools.execute(
 				self.id,
@@ -140,7 +149,7 @@ class Agent:
 
 		self.prompt.update(chat=self.memory.get_chat())
 
-		self.variables["prompt"] = self.prompt.make_prompt("tools", msg)
+		self.loopstate.prompt = self.prompt.make_prompt("tools", msg)
 
 		self.memory.add_message("tools", msg)
 

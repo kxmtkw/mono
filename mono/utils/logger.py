@@ -14,9 +14,9 @@ class Level(Enum):
 class Logger:
 
 	_enabled = True
-	_file = os.getenv("self.LOG_FILE")
-	_file = Path(_file) if _file else Path("logs") / "mono.log"
+	_file = Path("logs") / Path(os.getenv("LOG_FILE") or  "mono.log")
 
+	if not _file.parent.exists(): _file.parent.mkdir()
 	if not _file.exists(): _file.touch()
 
 	_level = Level.debug

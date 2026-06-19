@@ -15,7 +15,6 @@ class ToolCall(BaseModel):
 
 class ModelResponse(BaseModel):
 	response: str
-	toolcalled: bool
 	toolcall: ToolCall | list[ToolCall] | None
 	
 	@classmethod
