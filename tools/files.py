@@ -171,6 +171,36 @@ def list_directory(*, path: str, hidden: bool = False) -> ToolResult:
 		return ToolResult(False, f"Failed: {str(e)}")
 	
 
+@registry.tool(
+    "tree",
+    "Display directory tree structure.",
+    {
+        "path": (str, "Root directory path. Default working directory."),
+        "depth": (int, "Max recursion depth. Default 3."),
+        "hidden": (bool, "Include hidden directories. Default False.")
+    }
+)
+def tree(*, path: str = ".", depth: int = 3, hidden: bool = False) -> ToolResult:
+    root = Path(path).expanduser()
+    if not root.is_dir(): return ToolResult(False, "Invalid directory.")
+    
+    
+    def _build(p: Path, current_depth: int) -> str:
+        if current_depth > depth: return "..."
+        res = []
+        for item in sorted(p.iterdir()):
+            if not hidden and item.name.startswith('.'): continue
+            
+            prefix = "  " * current_depth
+            if item.is_dir():
+                res.append(f"{prefix}{item.name}/")
+                res.append(_build(item, current_depth + 1))
+            else:
+                res.append(f"{prefix}{item.name}")
+        return "\n".join(res)
+        
+    return ToolResult(True, _build(root, 0))
+
 
 @registry.tool(
 	"createDirectory",
