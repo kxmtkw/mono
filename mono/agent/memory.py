@@ -1,5 +1,8 @@
 
-from mono.utils import logger
+from mono.utils import Logger
+
+logger = Logger("memory")
+
 
 class MemoryManager():
 
@@ -8,7 +11,8 @@ class MemoryManager():
 		self.chat: list[str] = []
 
 	def add_message(self, role: str, msg: str):
-		self.chat.append(f"{role.upper()}: {msg}")
+		logger.debug(f"Updated chat by role '{role}'")
+		self.chat.append(f"<{role.upper()}> {msg}")
 
 	def get_chat(self) -> list[str]:
 		return self.chat

@@ -20,7 +20,7 @@ class LoopState:
 		self.user_input: str
 		self.prompt: str
 		self.model_response: ModelResponse
-		self.tool_calls: ToolCall | list[ToolCall]
+		self.tool_calls: list[ToolCall]
 
 
 class Agent:
@@ -73,6 +73,7 @@ class Agent:
 	def run(self):
 
 		while self.active:
+			print(f"exe: {self.current_stage.__name__}")
 			self.current_stage = self.current_stage()
 
 			
@@ -90,7 +91,6 @@ class Agent:
 		self.loopstate.prompt = self.prompt.make_prompt("user", user_input)
 
 		self.memory.add_message("user", user_input)
-
 		return self.ask_model
 	
 
@@ -115,7 +115,7 @@ class Agent:
 
 		response: ModelResponse = self.loopstate.model_response
 
-		if response.toolcall is not None:
+		if len(response.toolcall) != 0:
 			self.loopstate.tool_calls = response.toolcall
 			return self.execute_tool
 		
@@ -130,28 +130,24 @@ class Agent:
 		
 		toolcalls = self.loopstate.tool_calls
 
-
-		if isinstance(toolcalls, ToolCall):
-			toolcalls = [toolcalls]
-
 		msg = ""
 
 		for tool in toolcalls:
-
+			
+			args_as_dict = ModelResponse.convert_to_dict(tool.args)
 			result = self.tools.execute(
 				self.id,
 				tool.namespace,
 				tool.toolname,
-				ModelResponse.convert_to_dict(tool.args),
+				args_as_dict,
 			)
 			self.interface.tell("tools", f"Executed: {tool.namespace}::{tool.toolname}")
-			msg += f"Tool {tool.namespace}::{tool.toolname} executed. Successful = {result.success}.\n<output>\n{result.output}\n</output>"
+			msg += f"Tool {tool.namespace}::{tool.toolname} with args {args_as_dict} executed. Successful = {result.success}.\n<output>\n{result.output}\n</output>\n"
 
 		self.prompt.update(chat=self.memory.get_chat())
-
 		self.loopstate.prompt = self.prompt.make_prompt("tools", msg)
-
 		self.memory.add_message("tools", msg)
+
 
 		return self.ask_model
 

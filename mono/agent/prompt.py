@@ -1,7 +1,9 @@
 from mono.agent.config import AgentIdentity
 
 from mono.tools.toolbox import ToolSpace
-from mono.utils import logger
+from mono.utils import Logger
+
+logger = Logger("prompt")
 
 class PromptManager():
 
@@ -32,6 +34,7 @@ class PromptManager():
 				"</identity>"
 			]
 		)
+		logger.debug("Assembled base prompt")
 
 		self.chat: list[str] = []
 		self.toolspaces: list[ToolSpace] = []
@@ -47,9 +50,11 @@ class PromptManager():
 		
 		if chat: 
 			self.chat = chat
+			logger.debug(f"Updated chat for agent({self.agent_id})")
 		if toolspaces: 
 			self.toolspaces = toolspaces
 			self.toolspaces_str = self._format_tools(toolspaces)
+			logger.debug(f"Updated tools section for agent({self.agent_id})")
 
 
 	def make_prompt(self, role: str, mesg: str) -> str:
@@ -60,20 +65,21 @@ class PromptManager():
 				"<tools>",
 				self.toolspaces_str,
 				"</tools>",
-				"<user>",
+				"<session>",
 				"<chat>",
 				*self.chat,
 				"</chat>",
-				"<prompt>",
-				f"{role.upper()}: {mesg}",
+				f"<prompt source={role}>",
+				mesg,
 				"</prompt>",
-				"</user>",
+				"</session>",
 			]
 		)
 
 		with open("logs/prompt.txt", "w") as file:
 			file.write(prompt + "\n"*10)
 
+		logger.debug(f"Made prompt for agent({self.agent_id})")
 		return prompt
 
 

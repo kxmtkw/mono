@@ -67,17 +67,24 @@ class ToolManager:
 		try:
 			result = tool.func(**args)
 		except Exception as e:
-			msg =  f"Tool({self.tool_id}) {space}::{name} failed. {e.__class__.__name__}: {e}. Should not have happened."
+			msg =  f"Tool({self.tool_id}) {space}::{name} failed with args {args}. {e.__class__.__name__}: {e}. Should not have happened."
 			logger.critical(msg)
 			return ToolResult(
 				False,
 			 	msg
 			)
 		
-		logger.debug(f"Tool({self.tool_id}) {space}::{name} result: Success({result.success})")
+		logger.debug(f"Tool({self.tool_id}) {space}::{name} with args {args}. Result: Success({result.success})")
 
 		self.tool_id += 1
 		return result
+	
+
+	def execute_batch(self, agent_id: int, toolcalls: list[tuple[str, str, dict[str, str]]]) -> list[ToolResult]:
+		results = []
+		for toolcall in toolcalls:
+			results.append(self.execute(agent_id, *toolcall))
+		return results
 
 		
 
