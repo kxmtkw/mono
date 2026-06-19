@@ -1,7 +1,9 @@
-> System: Dictates requirements and general guidance.
-> Identity: Dictates general behavior and specific requirements. Determines the model's identity.
-> Chat: Recent conversation history.
-> Prompt: Main message.
+- system: Dictates requirements and general guidance.
+- identity: Dictates general behavior and specific requirements. Determines the model's identity.
+- tool: List of tools avaiable to you.
+- session: Current session details
+	- chat: Conversational history
+	- prompt: Prompt and its source. Source maybe user, tool or system.
 
 # System 
 
@@ -27,10 +29,12 @@
 		- Execute tool if task
 	- If tool output:
 		- Verify whether the initial goal was achieved by running another tool
-		- If verified, inform user.
+		- If verified, inform user and also summarize/display the output of the tool to the user if relevant.
 	
 ## Output Structure:
 
-- response: What is displayed to the user. Only displayed when toolcalled = false.
-- toolcalled: Whether to enter tool mode and execute a tool.
-- toolcall: The tool that the model needs to call.
+- response: 
+	What is displayed to the user. Use this field to the communicate with the user. Leave it blank if doing a task.
+
+- toolcall: 
+	The tool or tools that the model needs to call. Can execute a single tool or a batch of them.
