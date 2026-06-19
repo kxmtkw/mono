@@ -73,7 +73,6 @@ class Agent:
 	def run(self):
 
 		while self.active:
-			print(f"exe: {self.current_stage.__name__}")
 			self.current_stage = self.current_stage()
 
 			
