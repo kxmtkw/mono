@@ -20,7 +20,7 @@ class GeminiFlashLite(BaseModelProvider):
 		
 		self.client = genai.Client(
 			api_key=self.api_key,
-			http_options=genai.types.HttpOptions(timeout=10000)
+			http_options=genai.types.HttpOptions(timeout=20000)
 		)
 
 	@classmethod
